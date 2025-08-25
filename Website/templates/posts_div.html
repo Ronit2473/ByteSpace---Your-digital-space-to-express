@@ -1,0 +1,728 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    font-family: "Inter", sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Animated background particles */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
+    animation: float 20s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    33% { transform: translateY(-20px) rotate(1deg); }
+    66% { transform: translateY(10px) rotate(-1deg); }
+  }
+
+  .main-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .posts-header {
+    text-align: center;
+    margin: 40px 0 50px;
+    position: relative;
+  }
+
+  .posts-title {
+    background: linear-gradient(135deg, #fff, #f8f9ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 900;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+    animation: glow 2s ease-in-out infinite alternate;
+    letter-spacing: -0.02em;
+  }
+
+  @keyframes glow {
+    from { text-shadow: 0 0 20px rgba(255, 255, 255, 0.5), 0 0 30px rgba(120, 119, 198, 0.3); }
+    to { text-shadow: 0 0 30px rgba(255, 255, 255, 0.8), 0 0 40px rgba(120, 119, 198, 0.5); }
+  }
+
+  .posts-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.2rem;
+    font-weight: 300;
+    margin-top: 10px;
+    letter-spacing: 0.5px;
+  }
+
+  .posts-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .post-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 24px;
+    margin-bottom: 30px;
+    overflow: hidden;
+    animation: slideUp 0.8s ease-out;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .post-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -100% 0; }
+    100% { background-position: 100% 0; }
+  }
+
+  .post-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+      0 25px 50px rgba(0, 0, 0, 0.15),
+      0 0 0 1px rgba(255, 255, 255, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
+
+  .post-header {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .post-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #4c51bf;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .post-author:hover {
+    color: #667eea;
+    text-decoration: none;
+    transform: translateX(4px);
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.2em;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .post-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .like-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 8px 16px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+  }
+
+  .like-section:hover {
+    background: rgba(255, 255, 255, 0.9);
+    transform: scale(1.05);
+  }
+
+  .like-count {
+    font-weight: 600;
+    color: #4c51bf;
+    font-size: 0.9rem;
+  }
+
+  .like-button {
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: #667eea;
+  }
+
+  .like-button:hover {
+    transform: scale(1.3) rotate(15deg);
+    color: #f093fb;
+  }
+
+  .like-button.fas {
+    color: #e53e3e;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+
+  .menu-btn {
+    background: rgba(102, 126, 234, 0.1);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    color: #667eea;
+    padding: 8px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 16px;
+  }
+
+  .menu-btn:hover {
+    background: rgba(102, 126, 234, 0.2);
+    transform: scale(1.05);
+  }
+
+  .dropdown-menu {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    padding: 8px;
+  }
+
+  .dropdown-item {
+    border-radius: 12px;
+    padding: 8px 16px;
+    transition: all 0.3s ease;
+    color: #4c51bf;
+    font-weight: 500;
+  }
+
+  .dropdown-item:hover {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    transform: translateX(4px);
+  }
+
+  .post-body {
+    padding: 24px;
+  }
+
+  .post-text {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    margin-bottom: 20px;
+    color: #2d3748;
+    font-weight: 400;
+  }
+
+  .comments-section {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(240, 147, 251, 0.05));
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 20px;
+    margin: 16px 0;
+    backdrop-filter: blur(10px);
+  }
+
+  .comment-item {
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .comment-item:hover {
+    background: rgba(255, 255, 255, 0.9);
+    transform: translateX(4px);
+  }
+
+  .comment-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .comment-content {
+    flex: 1;
+    line-height: 1.5;
+  }
+
+  .comment-content a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .comment-content a:hover {
+    color: #764ba2;
+    text-decoration: underline;
+  }
+
+  .comment-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .comment-date {
+    font-size: 0.8rem;
+    color: #718096;
+    font-weight: 500;
+  }
+
+  .comments-toggle {
+    color: #667eea;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 8px 16px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 12px;
+    display: inline-block;
+    transition: all 0.3s ease;
+  }
+
+  .comments-toggle:hover {
+    background: rgba(102, 126, 234, 0.2);
+    color: #4c51bf;
+    text-decoration: none;
+    transform: scale(1.05);
+  }
+
+  .no-comments {
+    color: #a0aec0;
+    font-size: 0.9rem;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .comment-form {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    align-items: flex-end;
+  }
+
+  .comment-input {
+    flex: 1;
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 16px 20px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    resize: vertical;
+    min-height: 50px;
+  }
+
+  .comment-input:focus {
+    outline: none;
+    border-color: #667eea;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    transform: scale(1.02);
+  }
+
+  .comment-input::placeholder {
+    color: #a0aec0;
+    font-weight: 500;
+  }
+
+  .comment-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    color: white;
+    padding: 16px 24px;
+    border-radius: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    font-family: inherit;
+    font-size: 0.95rem;
+    white-space: nowrap;
+  }
+
+  .comment-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #764ba2, #667eea);
+  }
+
+  .post-footer {
+    background: rgba(248, 250, 252, 0.8);
+    color: #718096;
+    padding: 16px 24px;
+    font-size: 0.85rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    font-weight: 500;
+  }
+
+  .create-post-section {
+    text-align: center;
+    margin: 60px 0;
+    animation: fadeIn 1.5s ease-in-out;
+  }
+
+  .create-post-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    border: none;
+    color: white;
+    padding: 20px 40px;
+    border-radius: 30px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 
+      0 10px 30px rgba(102, 126, 234, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .create-post-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .create-post-btn:hover::before {
+    left: 100%;
+  }
+
+  .create-post-btn:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 
+      0 20px 50px rgba(102, 126, 234, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.3);
+    color: white;
+    text-decoration: none;
+  }
+
+  .create-post-btn span {
+    position: relative;
+    z-index: 1;
+  }
+
+  .floating-elements {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .floating-elements::before,
+  .floating-elements::after {
+    content: '✨';
+    position: absolute;
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.6);
+    animation: float-element 15s infinite linear;
+  }
+
+  .floating-elements::before {
+    top: 20%;
+    left: 10%;
+    animation-delay: -5s;
+  }
+
+  .floating-elements::after {
+    top: 60%;
+    right: 15%;
+    animation-delay: -10s;
+  }
+
+  @keyframes float-element {
+    0% { transform: translateY(0px) rotate(0deg); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(50px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .posts-container {
+      padding: 0 16px;
+    }
+
+    .post-card {
+      margin-bottom: 20px;
+    }
+
+    .post-header {
+      padding: 16px 20px;
+    }
+
+    .post-body {
+      padding: 20px;
+    }
+
+    .comment-form {
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .comment-btn {
+      width: 100%;
+    }
+
+    .create-post-btn {
+      padding: 16px 32px;
+      font-size: 1.1rem;
+    }
+  }
+
+  /* Dark mode support */
+  @media (prefers-color-scheme: dark) {
+    .post-card {
+      background: rgba(26, 32, 44, 0.95);
+      color: #e2e8f0;
+    }
+
+    .post-text {
+      color: #e2e8f0;
+    }
+
+    .comment-item {
+      background: rgba(45, 55, 72, 0.7);
+      color: #e2e8f0;
+    }
+
+    .comment-input {
+      background: rgba(45, 55, 72, 0.8);
+      color: #e2e8f0;
+    }
+
+    .comment-input::placeholder {
+      color: #a0aec0;
+    }
+  }
+</style>
+
+<div class="floating-elements"></div>
+
+<div class="main-content">
+  <div class="posts-header">
+    <h1 class="posts-title">{% block header %}🌟 Feed{% endblock %}</h1>
+    <p class="posts-subtitle">Discover amazing stories from our community</p>
+  </div>
+
+  <div class="posts-container">
+    <div id="posts">
+      {% for post in posts %}
+      <div class="post-card">
+        <div class="post-header">
+          <a href="/posts/{{post.user.username}}" class="post-author">
+            <div class="avatar">{{ post.user.username[0]|upper }}</div>
+            <span>{{post.user.username}}</span>
+          </a>
+          <div class="post-actions">
+            <div class="like-section">
+              <span class="like-count" id="likes-count-{{post.id}}">
+                {{ post.likes|length }}
+              </span>
+              {% if user.id in post.likes|map(attribute="author")|list %}
+              <i
+                class="fas fa-heart like-button"
+                id="like-button-{{post.id}}"
+                onclick="like({{post.id}})"
+                title="Unlike post"
+              ></i>
+              {% else %}
+              <i
+                class="far fa-heart like-button"
+                id="like-button-{{post.id}}"
+                onclick="like({{post.id}})"
+                title="Like post"
+              ></i>
+              {% endif %}
+            </div>
+            
+            {% if user.id == post.author %}
+            <div class="post-menu">
+              <button
+                type="button"
+                class="menu-btn dropdown-toggle"
+                data-bs-toggle="dropdown"
+                title="Post options"
+              >⋯</button>
+              <ul class="dropdown-menu">
+                <li>
+                  <a href="/delete-post/{{post.id}}" class="dropdown-item">
+                    🗑️ Delete Post
+                  </a>
+                </li>
+              </ul>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        
+        <div class="post-body">
+          <div class="post-text">{{post.text}}</div>
+          
+          <div class="collapse" id="comments-{{post.id}}">
+            <div class="comments-section" id="comments-expanded-{{post.id}}">
+              {% for comment in post.comments %}
+              <div class="comment-item">
+                <div class="comment-content">
+                  <a href="/posts/{{comment.user.username}}">{{comment.user.username}}</a>
+                  <span>{{comment.text}}</span>
+                </div>
+                <div class="comment-actions">
+                  <small class="comment-date">{{comment.date_created}}</small>
+                  {% if user.id == comment.author or user.id == post.author %}
+                  <div class="post-menu">
+                    <button
+                      type="button"
+                      class="menu-btn dropdown-toggle"
+                      data-bs-toggle="dropdown"
+                      title="Comment options"
+                    >⋯</button>
+                    <ul class="dropdown-menu">
+                      <li>
+                        <a href="/delete-comment/{{comment.id}}" class="dropdown-item">
+                          🗑️ Delete Comment
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          
+          <p style="margin: 16px 0;">
+            {% if post.comments|length > 0 %}
+            <a class="comments-toggle" data-bs-toggle="collapse" href="#comments-{{post.id}}" role="button">
+              💬 View {{post.comments|length}} comment{{ 's' if post.comments|length != 1 else '' }}
+            </a>
+            {% else %}
+            <span class="no-comments">💭 No comments yet</span>
+            {% endif %}
+          </p>
+          
+          <form
+            class="comment-form"
+            method="POST"
+            action="/create-comment/{{post.id}}"
+          >
+            <input
+              type="text"
+              id="text"
+              name="text"
+              class="comment-input"
+              placeholder="Share your thoughts..."
+              required
+            />
+            <button type="submit" class="comment-btn">
+              <span>💌 Comment</span>
+            </button>
+          </form>
+        </div>
+        
+        <div class="post-footer">
+          📅 {{post.date_created}}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% block footer %}
+  <div class="create-post-section">
+    <a href="/create-post" class="create-post-btn">
+      <span>✨ Create New Post</span> 
+    </a>
+  </div>
+  {% endblock %}
+</div>
+
+{% endblock %}
